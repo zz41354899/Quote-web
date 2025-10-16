@@ -32,6 +32,7 @@ function handleImportItems(items) {
 // Handle load template
 function handleLoadTemplate(template) {
   quoteData.value.company = template.company
+  quoteData.value.customer = template.customer
   quoteData.value.items = template.items.map(item => ({
     ...item,
     id: crypto.randomUUID()

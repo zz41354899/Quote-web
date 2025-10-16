@@ -48,6 +48,7 @@ function saveTemplate() {
     id: crypto.randomUUID(),
     name: templateName.value.trim(),
     company: props.currentData.company,
+    customer: props.currentData.customer,
     items: props.currentData.items.map(item => ({
       description: item.description,
       quantity: item.quantity,
