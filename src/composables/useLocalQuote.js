@@ -55,10 +55,10 @@ function loadFromStorage() {
     }
     
     // Migrate old data structure to new structure
-    const emptyQuote = getEmptyQuote()
+    // Always generate new quotationNumber and createdAt for consistency
     return {
-      quotationNumber: parsed.quotationNumber || emptyQuote.quotationNumber,
-      validUntil: parsed.validUntil || emptyQuote.validUntil,
+      quotationNumber: generateQuotationNumber(),
+      validUntil: parsed.validUntil || getDefaultValidUntil(),
       company: {
         name: parsed.company?.name || '',
         address: parsed.company?.address || '',
@@ -73,7 +73,7 @@ function loadFromStorage() {
       },
       items: parsed.items || [],
       notes: parsed.notes || '',
-      createdAt: parsed.createdAt || emptyQuote.createdAt
+      createdAt: new Date().toISOString()
     }
   } catch (error) {
     console.error('Failed to load quote data:', error)
