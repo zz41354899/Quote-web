@@ -1,14 +1,44 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useLocalQuote } from './composables/useLocalQuote'
+import { useToast } from './composables/useToast'
 import { exportToPDF } from './utils/exportPDF'
 import { exportToCSV } from './utils/exportCSV'
 import EmptyState from './components/EmptyState.vue'
 import QuoteEditor from './components/QuoteEditor.vue'
 import ItemTable from './components/ItemTable.vue'
 import ExportControls from './components/ExportControls.vue'
+import Toast from './components/Toast.vue'
+import ImportDialog from './components/ImportDialog.vue'
+import TemplateDialog from './components/TemplateDialog.vue'
 
 const { quoteData, clearQuote, addItem, removeItem, updateItemTotal } = useLocalQuote()
+const { toastState, showSuccess, showError, closeToast } = useToast()
+
+const showImportDialog = ref(false)
+const showTemplateDialog = ref(false)
+
+// Handle items reorder
+function handleReorderItems(newItems) {
+  quoteData.value.items = newItems
+}
+
+// Handle import items
+function handleImportItems(items) {
+  quoteData.value.items.push(...items)
+  showSuccess(`成功匯入 ${items.length} 個項目`)
+}
+
+// Handle load template
+function handleLoadTemplate(template) {
+  quoteData.value.company = template.company
+  quoteData.value.items = template.items.map(item => ({
+    ...item,
+    id: crypto.randomUUID()
+  }))
+  quoteData.value.notes = template.notes
+  showSuccess('範本載入成功')
+}
 
 const hasItems = computed(() => {
   return quoteData.value.items.length > 0
@@ -39,24 +69,24 @@ async function handleExportPDF() {
     await exportToPDF(quoteData.value)
     console.log('PDF 匯出成功')
     clearQuote()
-    alert('✅ PDF 匯出成功！資料已清除')
+    showSuccess('PDF 匯出成功！資料已清除')
   } catch (error) {
     console.error('PDF 匯出失敗:', error)
-    alert('❌ ' + error.message)
+    showError(error.message)
   }
 }
 
-// Handle CSV export
+// Handle CSV export (items only)
 function handleExportCSV() {
   try {
     console.log('開始匯出 CSV...', quoteData.value)
     exportToCSV(quoteData.value)
     console.log('CSV 匯出成功')
     clearQuote()
-    alert('✅ CSV 匯出成功！資料已清除')
+    showSuccess('CSV 匯出成功！資料已清除')
   } catch (error) {
     console.error('CSV 匯出失敗:', error)
-    alert('❌ ' + error.message)
+    showError(error.message)
   }
 }
 </script>
@@ -79,7 +109,19 @@ function handleExportCSV() {
               <p class="text-xs text-gray-500">Quotation Generator</p>
             </div>
           </div>
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-3">
+            <!-- Template Button -->
+            <button
+              @click="showTemplateDialog = true"
+              class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              title="範本管理"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              </svg>
+              <span class="hidden sm:inline">範本</span>
+            </button>
+            
             <!-- GitHub Icon -->
             <a 
               href="https://github.com/zz41354899/Quote-web" 
@@ -99,15 +141,15 @@ function handleExportCSV() {
 
     <!-- Main Content -->
     <main class="flex-1">
-      <div class="max-w-4xl mx-auto px-6 py-12">
-        <div class="mb-8">
-          <h2 class="text-3xl font-semibold text-gray-800 mb-2">建立報價單</h2>
-          <p class="text-gray-500">快速建立專業報價單，支援 PDF 與 CSV 匯出</p>
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+        <div class="mb-10 sm:mb-12">
+          <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">建立報價單</h2>
+          <p class="text-base sm:text-lg text-gray-600">快速建立專業報價單，支援 PDF 與 CSV 匯出</p>
         </div>
       
       <EmptyState v-if="!hasItems" @add-item="addItem" />
       
-      <div v-else class="space-y-6">
+      <div v-else class="space-y-8 sm:space-y-10">
         <QuoteEditor 
           v-model:quotationNumber="quoteData.quotationNumber"
           v-model:validUntil="quoteData.validUntil"
@@ -121,6 +163,8 @@ function handleExportCSV() {
           @add-item="addItem"
           @remove-item="removeItem"
           @update-total="updateItemTotal"
+          @reorder-items="handleReorderItems"
+          @show-import="showImportDialog = true"
         />
         
         <ExportControls 
@@ -144,6 +188,29 @@ function handleExportCSV() {
         </div>
       </div>
     </footer>
+
+    <!-- Toast Notification -->
+    <Toast
+      :show="toastState.show"
+      :type="toastState.type"
+      :message="toastState.message"
+      @close="closeToast"
+    />
+
+    <!-- Import Dialog -->
+    <ImportDialog
+      :show="showImportDialog"
+      @close="showImportDialog = false"
+      @import="handleImportItems"
+    />
+
+    <!-- Template Dialog -->
+    <TemplateDialog
+      :show="showTemplateDialog"
+      :current-data="quoteData"
+      @close="showTemplateDialog = false"
+      @load-template="handleLoadTemplate"
+    />
       
       <!-- Hidden PDF Preview Template -->
       <div id="pdf-preview" style="position: fixed; left: 0; top: 0; width: 800px; visibility: hidden; pointer-events: none; z-index: -1; background: white;">

@@ -19,73 +19,32 @@ function formatDate(dateString) {
 export function exportToCSV(quoteData) {
   // Validate data
   if (!quoteData.items || quoteData.items.length === 0) {
-    throw new Error('請至少新增一個報價項目')
+    throw new Error('❌ 請至少新增一個報價項目')
   }
   
-  if (!quoteData.customer || !quoteData.customer.name) {
-    throw new Error('請填寫客戶名稱')
+  if (!quoteData.customer || !quoteData.customer.name || quoteData.customer.name.trim() === '') {
+    throw new Error('❌ 請填寫客戶名稱（必填欄位）')
   }
   
-  // Build CSV content manually for better control
-  const lines = []
-  
-  // === 報價單資訊 ===
-  lines.push(['報價單資訊', ''])
-  lines.push(['報價單編號', quoteData.quotationNumber || ''])
-  lines.push(['報價日期', formatDate(quoteData.createdAt)])
-  lines.push(['有效期限', formatDate(quoteData.validUntil)])
-  lines.push(['']) // Empty line
-  
-  // === 報價方資訊 ===
-  if (quoteData.company && (quoteData.company.name || quoteData.company.address || quoteData.company.phone || quoteData.company.email)) {
-    lines.push(['報價方', ''])
-    if (quoteData.company.name) lines.push(['公司名稱', quoteData.company.name])
-    if (quoteData.company.address) lines.push(['公司地址', quoteData.company.address])
-    if (quoteData.company.phone) lines.push(['公司電話', quoteData.company.phone])
-    if (quoteData.company.email) lines.push(['公司Email', quoteData.company.email])
-    lines.push(['']) // Empty line
+  // Validate items have description
+  const emptyItems = quoteData.items.filter(item => !item.description || item.description.trim() === '')
+  if (emptyItems.length > 0) {
+    throw new Error('❌ 請填寫所有報價項目的品項名稱')
   }
   
-  // === 客戶資訊 ===
-  lines.push(['客戶', ''])
-  lines.push(['客戶名稱', quoteData.customer.name])
-  if (quoteData.customer.address) lines.push(['客戶地址', quoteData.customer.address])
-  if (quoteData.customer.phone) lines.push(['聯絡電話', quoteData.customer.phone])
-  if (quoteData.customer.email) lines.push(['Email', quoteData.customer.email])
-  lines.push(['']) // Empty line
-  
-  // === 報價項目 ===
-  lines.push(['報價項目', '', '', ''])
-  lines.push(['品項名稱', '數量', '單價', '小計'])
-  
-  // Calculate total
-  let totalAmount = 0
-  quoteData.items.forEach(item => {
-    lines.push([
-      item.description || '',
-      item.quantity || 0,
-      item.unitPrice || 0,
-      item.total || 0
-    ])
-    totalAmount += item.total || 0
-  })
-  
-  lines.push(['']) // Empty line
-  lines.push(['總金額', '', '', totalAmount])
-  
-  // === 備註 ===
-  if (quoteData.notes && quoteData.notes.trim()) {
-    lines.push(['']) // Empty line
-    lines.push(['備註', ''])
-    // Split notes by newline and add each line
-    const noteLines = quoteData.notes.split('\n')
-    noteLines.forEach(line => {
-      lines.push([line])
-    })
-  }
+  // Prepare CSV data - only items with proper headers
+  const csvData = quoteData.items.map(item => ({
+    '品項名稱': item.description || '',
+    '數量': item.quantity || 0,
+    '單價': item.unitPrice || 0,
+    '小計': item.total || 0
+  }))
   
   // Generate CSV string using papaparse
-  const csv = Papa.unparse(lines)
+  const csv = Papa.unparse(csvData, {
+    header: true,
+    columns: ['品項名稱', '數量', '單價', '小計']
+  })
   
   // Add UTF-8 BOM for Excel compatibility
   const blob = new Blob(['\ufeff' + csv], { 

@@ -53,12 +53,12 @@ const localNotes = computed({
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 sm:space-y-8">
     <!-- Quote Info Card -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 hover:shadow-md transition-shadow">
-      <h2 class="text-lg font-semibold text-gray-800 mb-6">報價單資訊</h2>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 lg:p-10 hover:shadow-lg transition-all">
+      <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-6 sm:mb-8">報價單資訊</h2>
       
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
         <div>
           <label class="block text-sm font-medium text-gray-600 mb-2">
             報價單編號
@@ -85,10 +85,10 @@ const localNotes = computed({
     </div>
 
     <!-- Company Info Card -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 hover:shadow-md transition-shadow">
-      <h2 class="text-lg font-semibold text-gray-800 mb-6">公司資訊</h2>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 lg:p-10 hover:shadow-lg transition-all">
+      <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-6 sm:mb-8">公司資訊</h2>
       
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
         <div class="md:col-span-2">
           <label class="block text-sm font-medium text-gray-600 mb-2">
             公司名稱
@@ -140,10 +140,10 @@ const localNotes = computed({
     </div>
 
     <!-- Customer Info Card -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 hover:shadow-md transition-shadow">
-      <h2 class="text-lg font-semibold text-gray-800 mb-6">客戶資訊</h2>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 lg:p-10 hover:shadow-lg transition-all">
+      <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-6 sm:mb-8">客戶資訊</h2>
       
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
         <div class="md:col-span-2">
           <label class="block text-sm font-medium text-gray-600 mb-2">
             客戶名稱 <span class="text-red-400">*</span>
@@ -195,8 +195,8 @@ const localNotes = computed({
     </div>
 
     <!-- Notes Card -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 hover:shadow-md transition-shadow">
-      <h2 class="text-lg font-semibold text-gray-800 mb-6">備註</h2>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 lg:p-10 hover:shadow-lg transition-all">
+      <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-6 sm:mb-8">備註</h2>
       
       <textarea
         v-model="localNotes"

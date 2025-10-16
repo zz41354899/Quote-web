@@ -9,11 +9,17 @@ import html2canvas from 'html2canvas'
 export async function exportToPDF(quoteData) {
   // Validate data
   if (!quoteData.items || quoteData.items.length === 0) {
-    throw new Error('請至少新增一個報價項目')
+    throw new Error('❌ 請至少新增一個報價項目')
   }
   
-  if (!quoteData.customer || !quoteData.customer.name) {
-    throw new Error('請輸入客戶名稱')
+  if (!quoteData.customer || !quoteData.customer.name || quoteData.customer.name.trim() === '') {
+    throw new Error('❌ 請填寫客戶名稱（必填欄位）')
+  }
+  
+  // Validate items have description
+  const emptyItems = quoteData.items.filter(item => !item.description || item.description.trim() === '')
+  if (emptyItems.length > 0) {
+    throw new Error('❌ 請填寫所有報價項目的品項名稱')
   }
   
   // Generate filename with timestamp
